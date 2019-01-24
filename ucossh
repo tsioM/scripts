@@ -5,7 +5,7 @@
 #   
 #   Dependencies: sshpass
 #
-#   Installation: 1. install ucossh in your $HOME
+#   Installation: 1. download ucossh
 #                 2. run ucossh
 #
 #   Author: Keith Hand <rkeithhand@gmail.com>
@@ -50,7 +50,7 @@ excessParamError () {
 }
 
 # Initilization
-configFile=$HOME/.scripts/.data/school.data
+configFile=.data/school.data
 
 if [ ! -f $configFile ]; then
     echo "ucoSSH: no config file found."
