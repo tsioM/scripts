@@ -1,6 +1,6 @@
 # Scripts
 
-Currently only two files, but more in progress.
+Currently only two files in here but more in progress.
 
 Current files are as described below
 1. Remove Slash R<br/>Description: The only really complete and full script. Takes one file and removes any \r characters that Windows sometimes produces when modifying files.
