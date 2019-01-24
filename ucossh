@@ -1,0 +1,164 @@
+###
+#   SSH for UCO Classes 0.0.1a - a Bash script to
+#   connect via SSH into University cs directory
+#   @ cs.uco.edu
+#   
+#   Dependencies: sshpass
+#
+#   Installation: 1. install ucossh in your $HOME
+#                 2. run ucossh
+#
+#   Author: Keith Hand <rkeithhand@gmail.com>
+###
+
+#!/bin/bash
+
+# Error Handling
+helpStatement () {
+    echo "ucoSSH 0.0.3a (2019 Jan 24)"
+    echo
+    echo "usage: ucossh [argument]"
+    echo
+    echo "Arguments:"
+    echo -e "    --add\t\tAdd a class to the config file\t\tCURRENTLY NOT WORKING"
+    echo -e "    --remove\t\tRemove a class to the config file\tCURRENTLY NOT WORKING"
+    echo -e "    --clean\t\tDelete current config file\tCAREFUL: This is irreversible"
+    echo -e "    --help\t\tDisplays this menu and exits"
+}
+
+invalidSelection() {
+    echo "Invalid selection, please try again"
+}
+
+defaultHelpStatement() { 
+    echo "Try 'ucossh --help' for more information."
+}
+
+defaultCommandError () {
+    echo "ucoSSH: unknown parameter entered."
+    defaultHelpStatement
+}
+
+noParamError () {
+    echo "Which "
+    defaultHelpStatement
+}
+
+excessParamError () {
+    echo "ucoSSH: too many parameters entered."
+    defaultHelpStatement
+}
+
+# Initilization
+configFile=$HOME/.scripts/.data/school.data
+
+if [ ! -f $configFile ]; then
+    echo "ucoSSH: no config file found."
+    echo
+    echo "  --- GENERATING CONFIG FILE ---  "
+    echo
+    touch $configFile
+    echo -e "KEY=0" >> $configFile
+
+    echo -ne 'CLASSNAME\t' >> $configFile
+    read -ep "Class Name: " classname
+    echo $classname >> $configFile
+
+    echo -ne 'USERNAME\t' >> $configFile
+    read -ep "Username: " username
+    echo $username >> $configFile
+
+    echo -ne 'PASSWORD\t' >> $configFile
+    read -ep "Password: " password
+    echo $password >> $configFile
+        
+    exit
+fi
+
+# Global Variables
+totalClasses=$(awk '/KEY/ {count++} END {print count}' $configFile)
+
+# Functions
+addClass() {
+    return
+}
+
+removeClass() {
+	displayClasses
+    declare -i desiredSelection
+    read -ep "Which class would you like to remove? " desiredSelection
+    if [ "$desiredSelection" -ge 1 ] && [ "$desiredSelection" -le "$totalClasses" ]; then
+        echo $desiredSelection # NEEDS IMPLEMENTATION HERE. Different function?
+    else
+        invalidSelection
+    fi
+}
+
+deleteProfile () {
+    if [ ! -f $configFile ]; then
+        return
+    fi
+    rm $configFile;
+}
+
+displayClasses() {
+    for (( i=1; i<=$totalClasses; i++ ))
+    do
+        declare -i classLine
+        lineStart=$(awk "/KEY=$i/{ print NR; exit }" $configFile)
+        classLine=$lineStart+1
+        CLASS="$(awk '{ for (i=2; i<=NF; i++) print $i }' <(sed -n "$classLine p" $configFile))"
+        echo -n "$i. "
+        echo $CLASS
+    done
+    echo
+}
+
+selectClass() {
+    if [[ "$(awk "/KEY=$desiredSelection/{ print NR; exit }" $configFile)" =~ ^[0-9]+$ ]]; then
+        declare -i userLine
+        declare -i passLine
+        lineStart=$(awk "/KEY=$desiredSelection/{ print NR; exit }" $configFile)
+        userLine=$lineStart+2
+        passLine=$lineStart+3
+        USERNAME="$(awk '{print $2}' <(sed -n "$userLine p" $configFile))"
+        PASSWORD="$(awk '{print $2}' <(sed -n "$passLine p" $configFile))"
+    else
+        invalidSelection
+    fi
+}
+
+connectToSchool() {
+    sshpass -p "$PASSWORD" ssh $USERNAME@cs.uco.edu
+}
+
+# Main
+if [ -n "$2" ]; then
+    excessParamError
+    exit
+elif [ -n "$1" ]; then
+    case "$1" in
+        --add)
+            addClass ;;
+        --remove)
+            removeClass ;;
+        --clean)
+            if [ -f $configFile ]; then
+                deleteProfile
+            fi ;;
+        --help)
+            helpStatement
+            exit ;;
+        *)
+            defaultCommandError ;;
+    esac
+else
+    echo "Available connections:"
+    displayClasses
+    read -ep "Which class would you like to connect to (default = 1): " desiredSelection
+    if [ -z $desiredSelection ]; then
+        desiredSelection=1
+    fi
+    selectClass
+    #connectToSchool        //  ONLY UNCOMMENT TO GO LIVE
+fi

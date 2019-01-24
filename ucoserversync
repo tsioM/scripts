@@ -1,0 +1,11 @@
+###
+#   UCO CS Server Sync 0.0.1a - a Bash script to 
+#   sync files in documents directory to the
+#   cs.uco.edu server.
+#   
+#   Author: Keith Hand <rkeithhand@gmail.com>
+###
+
+#!/bin/bash
+sshpass -p "uowsag" scp -r $HOME/documents/School/Data\ Structures\ and\ Algorithms/PA* gp053@cs.uco.edu:~/                   #   sync for Programming II
+sshpass -p "uowsag" scp -r $HOME/documents/School/Data\ Structures\ and\ Algorithms\ Lab/* gp053@cs.uco.edu:~/lab/            #   sync for Programming II Lab

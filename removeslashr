@@ -1,0 +1,18 @@
+###
+#   Remove slashR 0.0.1a - a Bash script to remove
+#   the \r character sometimes appearing in documents
+#   that are transfered from Windows to Unix.
+#   
+#   Author: Keith Hand <rkeithhand@gmail.com>
+###
+
+#!/bin/bash
+if [ -n "$1" ]; then
+	fileOld=$1
+	fileNew=$fileOld".Unix"
+	sed $'s/\r$//' $fileOld > $fileNew
+	rm $fileOld
+	mv $fileNew $fileOld
+else
+	echo "No file to remove \r from"
+fi
